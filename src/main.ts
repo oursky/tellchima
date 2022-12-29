@@ -21,7 +21,7 @@ slackApp.command(process.env.SHEDULED_MESSAGE_COMMAND_SCHEDULE, async ({ payload
   await respond(
 `Received!
 Preview: \`#${scheduledMessage.id}\` ${scheduledMessage.content}
-P.S. You can remove this post with \`/untell-doge #${scheduledMessage.id} ${scheduledMessageService.hash(scheduledMessage)}\``);
+P.S. You can remove this post with \`${process.env.SHEDULED_MESSAGE_COMMAND_UNSCHEDULE} #${scheduledMessage.id} ${scheduledMessageService.hash(scheduledMessage)}\``);
 });
 
 slackApp.command(process.env.SHEDULED_MESSAGE_COMMAND_UNSCHEDULE, async ({ payload, ack, respond }) => {

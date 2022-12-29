@@ -72,7 +72,7 @@ export class ScheduledMessageService {
       },
     })
 
-    let summaryText = "Doge Summary (/tell-doge to add)";
+    let summaryText = `Doge Summary (\`${process.env.SHEDULED_MESSAGE_COMMAND_SCHEDULE}\` to add)`;
     for (const message of messagesToBePulished) {
       summaryText += "\n" + `\`#${message.id}\` ${message.content}`;
     }

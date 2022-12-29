@@ -14,3 +14,7 @@ start:
 .PHONY: ngrok
 ngrok:
 	ngrok http 3000
+
+.PHONY: deploy
+deploy:
+	fly deploy
