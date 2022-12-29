@@ -1,6 +1,7 @@
 import * as dotenv from 'dotenv';
 dotenv.config();
 
+import { APIError, UserNotAuthorizedError } from './messages';
 import { getPrisma } from './prisma';
 import { getSlack } from './slack';
 import { ScheduledMessageService } from './services/schedule-message.service';
@@ -19,7 +20,37 @@ slackApp.command('/tell-doge', async ({ payload, ack, respond }) => {
 
   await respond(
 `Received!
-Preview: \`#${scheduledMessage.id}\` ${scheduledMessage.content}`);
+Preview: \`#${scheduledMessage.id}\` ${scheduledMessage.content}
+P.S. You can remove this post with \`/untell-doge #${scheduledMessage.id} ${scheduledMessageService.hash(scheduledMessage)}\``);
+});
+
+slackApp.command('/untell-doge', async ({ payload, ack, respond }) => {
+  await ack();
+
+  await respond("Woof! Processing...");
+
+  const scheduledMessageService = new ScheduledMessageService(getPrisma(), slackApp);
+
+  const [rawMessageID, deletionHash] = payload.text.split(" ");
+  const messageID = parseInt(rawMessageID.replace("#", ""), 10);
+
+  await scheduledMessageService.unschedule(messageID, deletionHash)
+  .then(() => {
+    return respond("Unscheduled successfully");
+  })
+  .catch((error) => {
+    console.log("=== error", error);
+
+    if (error instanceof UserNotAuthorizedError) {
+      return respond("Only message owner may delete this message")
+    }
+    if (error instanceof APIError) {
+      return respond(error.description);
+    }
+
+    throw error;
+  });
+
 });
 
 (async () => {

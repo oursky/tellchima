@@ -1,8 +1,11 @@
+import crypto from "crypto";
 import { PrismaClient, ScheduledMessage } from '@prisma/client';
 import { App } from '@slack/bolt';
 import dayjs from 'dayjs';
 import timezone from 'dayjs/plugin/timezone';
-import { SCHEDULED_MESSAGE_PUBLISH_HOUR } from '../constants';
+
+import { SCHEDULED_MESSAGE_HASH_SALT, SCHEDULED_MESSAGE_PUBLISH_HOUR } from '../constants';
+import { UserNotAuthorizedError } from '../messages';
 
 dayjs.extend(timezone);
 dayjs.tz.setDefault("Asia/Hong_Kong");
@@ -14,6 +17,13 @@ export class ScheduledMessageService {
   constructor(prisma: PrismaClient, slack: App) {
     this.prisma = prisma;
     this.slack = slack;
+  }
+
+  // FIXME: Insecure hash
+  hash(message: ScheduledMessage): string {
+    return crypto.createHash("shake256", { outputLength: 6 })
+      .update(`${SCHEDULED_MESSAGE_HASH_SALT}-${message.id}`)
+      .digest("hex");
   }
 
   schedule(content: string) {
@@ -35,6 +45,22 @@ export class ScheduledMessageService {
         scheduled_at: earliestSchedulableDate.toDate(),
       }
     })
+  }
+
+  async unschedule(messageID: number, deletionHash: string) {
+    const message = await this.prisma.scheduledMessage.findFirst({
+      where: {
+        id: {
+          equals: messageID,
+        }
+      },
+    })
+
+    if (!message || deletionHash !== this.hash(message)) {
+      throw new UserNotAuthorizedError();
+    }
+
+    await this.prisma.scheduledMessage.delete({ where: { id: message.id } });
   }
 
   async publishAndDiscard() {
