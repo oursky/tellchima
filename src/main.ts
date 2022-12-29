@@ -12,7 +12,7 @@ const slackApp = getSlack();
 slackApp.command('/tell-doge', async ({ payload, ack, respond }) => {
   await ack();
 
-  await respond("Meow! Processing...");
+  await respond("Woof! Processing...");
 
   const scheduledMessageService = new ScheduledMessageService(getPrisma(), slackApp);
   const scheduledMessage = await scheduledMessageService.schedule(payload.text);

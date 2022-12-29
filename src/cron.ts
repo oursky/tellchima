@@ -3,6 +3,25 @@ import { getPrisma } from './prisma';
 import { CronJob } from "cron";
 import { ScheduledMessageService } from './services/schedule-message.service';
 
+const taskRemindMessageScheduling = new CronJob(
+  // Every day 4PM HKT (1 hour before publish i.e. 5PM HKT)
+	'0 16 * * *',
+	function() {
+    const slack = getSlack();
+
+    slack.client.chat.postMessage({
+      channel: process.env.SHEDULED_MESSAGE_CHANNEL_ID,
+      text: "If you have something to post, please `/tell-doge`. Publishes daily at 5pm.",
+    })
+	},
+	null,
+	true,
+	'Asia/Hong_Kong'
+);
+
+taskRemindMessageScheduling.start();
+
+
 const taskPublishScheduledMessages = new CronJob(
   // Every day 5PM HKT
 	'0 17 * * *',
