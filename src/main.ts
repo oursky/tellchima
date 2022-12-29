@@ -10,7 +10,7 @@ import "./cron";
 
 const slackApp = getSlack();
 
-slackApp.command('/tell-doge', async ({ payload, ack, respond }) => {
+slackApp.command(process.env.SHEDULED_MESSAGE_COMMAND_SCHEDULE, async ({ payload, ack, respond }) => {
   await ack();
 
   await respond("Woof! Processing...");
@@ -24,7 +24,7 @@ Preview: \`#${scheduledMessage.id}\` ${scheduledMessage.content}
 P.S. You can remove this post with \`/untell-doge #${scheduledMessage.id} ${scheduledMessageService.hash(scheduledMessage)}\``);
 });
 
-slackApp.command('/untell-doge', async ({ payload, ack, respond }) => {
+slackApp.command(process.env.SHEDULED_MESSAGE_COMMAND_UNSCHEDULE, async ({ payload, ack, respond }) => {
   await ack();
 
   await respond("Woof! Processing...");
