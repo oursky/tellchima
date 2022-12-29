@@ -1,0 +1,1 @@
+export const SCHEDULED_MESSAGE_PUBLISH_HOUR = 17;
