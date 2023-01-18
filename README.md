@@ -21,7 +21,7 @@ In another terminal...
 $ make ngrok
 ```
 
-Now enter `/enter-dogo [your message]` in https://oursky.slack.com/archives/C04GPBBHRM4 to test it out!
+Now enter `/enter-doge [your message]` in https://oursky.slack.com/archives/C04GPBBHRM4 to test it out!
 
 
 #### Stack
