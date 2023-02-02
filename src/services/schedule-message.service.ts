@@ -1,11 +1,12 @@
 import crypto from "crypto";
 import { PrismaClient, ScheduledMessage } from '@prisma/client';
-import { App } from '@slack/bolt';
+import { App, Block, KnownBlock } from '@slack/bolt';
 import dayjs from 'dayjs';
 import timezone from 'dayjs/plugin/timezone';
 
 import { SCHEDULED_MESSAGE_HASH_SALT, SCHEDULED_MESSAGE_PUBLISH_HOUR } from '../constants';
 import { UserNotAuthorizedError } from '../messages';
+import { XkcdComicService } from './xkcd-comic.service';
 
 dayjs.extend(timezone);
 dayjs.tz.setDefault("Asia/Hong_Kong");
@@ -80,9 +81,40 @@ export class ScheduledMessageService {
       summaryText += "\nNo News.";
     }
 
+    const randomComicURL = await new XkcdComicService().getRandomComic().catch(() => {})
+
+    const messageBlocks: (KnownBlock| Block)[] = [
+      {
+        "type": "section",
+        "fields": [
+          {
+            "type": "mrkdwn",
+            "text": summaryText,
+          },
+        ]
+      },
+      {
+        "type": "divider"
+      },
+      {
+        "type": "section",
+        "fields": [
+          {
+            "type": "mrkdwn",
+            "text": "*Random xkcd comic* :doge:",
+          },
+        ]
+      },
+      randomComicURL && {
+        "type": "image",
+        "image_url": randomComicURL,
+        "alt_text": "xkcd comic"
+      }
+    ].filter(Boolean);
+
     await this.slack.client.chat.postMessage({
       channel: process.env.SHEDULED_MESSAGE_CHANNEL_ID,
-      text: summaryText,
+      blocks: messageBlocks,
     })
     // FIXME: Silence slack API errors for now?
     .catch(() => {});
