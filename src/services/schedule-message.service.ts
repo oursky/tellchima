@@ -1,12 +1,13 @@
 import crypto from "crypto";
 import { PrismaClient, ScheduledMessage } from '@prisma/client';
-import { App, Block, KnownBlock } from '@slack/bolt';
+import { App, Block, KnownBlock, MrkdwnElement, PlainTextElement } from '@slack/bolt';
 import dayjs from 'dayjs';
 import timezone from 'dayjs/plugin/timezone';
 
 import { SCHEDULED_MESSAGE_HASH_SALT, SCHEDULED_MESSAGE_PUBLISH_HOUR } from '../constants';
 import { UserNotAuthorizedError } from '../messages';
 import { XkcdComicService } from './xkcd-comic.service';
+import { HackernewsService } from './hackernews.service';
 
 dayjs.extend(timezone);
 dayjs.tz.setDefault("Asia/Hong_Kong");
@@ -73,44 +74,82 @@ export class ScheduledMessageService {
       },
     })
 
-    let summaryText = `Doge Summary (\`${process.env.SHEDULED_MESSAGE_COMMAND_SCHEDULE}\` to add)`;
+    let summaryBlocks: (PlainTextElement | MrkdwnElement)[] = [];
     for (const message of messagesToBePulished) {
-      summaryText += "\n" + `\`#${message.id}\` ${message.content}`;
+      summaryBlocks.push({
+        "type": "mrkdwn",
+        "text": `\`#${message.id}\` ${message.content}`
+      });
     }
     if (messagesToBePulished.length === 0) {
-      summaryText += "\nNo News.";
+      summaryBlocks.push({
+        "type": "mrkdwn",
+        "text": "\n_No News._ :cheemscry:"
+      });
     }
-
-    const randomComicURL = await new XkcdComicService().getRandomComic().catch(() => {})
 
     const messageBlocks: (KnownBlock| Block)[] = [
       {
         "type": "section",
-        "fields": [
-          {
+        "text": {
+          "type": "mrkdwn",
+          "text": `Doge Summary (\`${process.env.SHEDULED_MESSAGE_COMMAND_SCHEDULE}\` to add)`,
+        },
+      },
+      ...summaryBlocks.map(block => (
+        {
+          "type": "section",
+          "text": block
+        }
+      ))
+    ];
+
+    const now = dayjs();
+    const topStory = await new HackernewsService().getTopStory().catch(() => {});
+    if (topStory) {
+      messageBlocks.push(
+        {
+          "type": "divider"
+        },
+        {
+          "type": "section",
+          "text": {
             "type": "mrkdwn",
-            "text": summaryText,
+            "text": "*Hacker News Top Story* :rolled_up_newspaper:",
           },
-        ]
-      },
-      {
-        "type": "divider"
-      },
-      {
-        "type": "section",
-        "fields": [
-          {
+        },
+        {
+          "type": "section",
+          "text": {
             "type": "mrkdwn",
-            "text": "*Random xkcd comic* :doge:",
+            "text": `<${topStory.url}|${topStory.title}>`,
           },
-        ]
-      },
-      randomComicURL && {
-        "type": "image",
-        "image_url": randomComicURL,
-        "alt_text": "xkcd comic"
+        },
+      );
+    }
+
+    if ([1, 3, 5].includes(now.day())) {
+      const randomComicURL = await new XkcdComicService().getRandomComic().catch(() => {})
+      if (randomComicURL) {
+        messageBlocks.push(
+          {
+            "type": "divider"
+          },
+          {
+            "type": "section",
+            "text": {
+              "type": "mrkdwn",
+              "text": "*Random Xkcd Comic* :doge:",
+            },
+          },
+          {
+            "type": "image",
+            "image_url": randomComicURL,
+            "alt_text": "Xkcd Comic"
+          }
+        );
       }
-    ].filter(Boolean);
+    }
 
     await this.slack.client.chat.postMessage({
       channel: process.env.SHEDULED_MESSAGE_CHANNEL_ID,
