@@ -151,13 +151,24 @@ export class ScheduledMessageService {
       }
     }
 
+    for (var block of messageBlocks) {
+      // NOTE: Post every block as a message for easier reply
+      await this.postMessage([block]);
+    }
+
+    await this.pruneMessages(messagesToBePulished);
+  }
+
+  private async postMessage(messageBlocks: (KnownBlock | Block)[]) {
     await this.slack.client.chat.postMessage({
       channel: process.env.SCHEDULED_MESSAGE_CHANNEL_ID,
       blocks: messageBlocks,
     })
     // FIXME: Silence slack API errors for now?
     .catch(() => {});
+  }
 
+  private async pruneMessages(messagesToBePulished: any[]) {
     await this.prisma.scheduledMessage.deleteMany({
       where: {
         id: {
