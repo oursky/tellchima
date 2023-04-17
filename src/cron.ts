@@ -10,8 +10,8 @@ const taskRemindMessageScheduling = new CronJob(
     const slack = getSlack();
 
     slack.client.chat.postMessage({
-      channel: process.env.SHEDULED_MESSAGE_CHANNEL_ID,
-      text: `If you have something to post, please \`${process.env.SHEDULED_MESSAGE_COMMAND_SCHEDULE}\`. Publishes daily at 5pm.`,
+      channel: process.env.SCHEDULED_MESSAGE_CHANNEL_ID,
+      text: `If you have something to post, please \`${process.env.SCHEDULED_MESSAGE_COMMAND_SCHEDULE}\`. Publishes daily at 5pm.`,
     })
 	},
 	null,

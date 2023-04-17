@@ -93,7 +93,7 @@ export class ScheduledMessageService {
         "type": "section",
         "text": {
           "type": "mrkdwn",
-          "text": `Doge Summary (\`${process.env.SHEDULED_MESSAGE_COMMAND_SCHEDULE}\` to add)`,
+          "text": `Doge Summary (\`${process.env.SCHEDULED_MESSAGE_COMMAND_SCHEDULE}\` to add)`,
         },
       },
       ...summaryBlocks.map(block => (
@@ -152,7 +152,7 @@ export class ScheduledMessageService {
     }
 
     await this.slack.client.chat.postMessage({
-      channel: process.env.SHEDULED_MESSAGE_CHANNEL_ID,
+      channel: process.env.SCHEDULED_MESSAGE_CHANNEL_ID,
       blocks: messageBlocks,
     })
     // FIXME: Silence slack API errors for now?
