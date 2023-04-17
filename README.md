@@ -30,3 +30,15 @@ This project uses following tools:
 - Nodejs (Typescript)
 - Prisma (SQLite connector)
 - Slack SDK (BoltJS)
+
+#### Deployment
+
+```sh
+# Build
+make docker-image
+make push-docker-image
+
+# Deploy
+blackbox_postdeploy
+make deploy
+```
