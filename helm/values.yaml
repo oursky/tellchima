@@ -1,0 +1,7 @@
+image:
+  registry: gcr.io/oursky-kube
+scheduledMessage:
+  channelId: C024JGMKY
+  command:
+    schedule: "/tellchima"
+    unschedule: "/untellchima"

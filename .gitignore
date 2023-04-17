@@ -203,3 +203,4 @@ data.db-journal
 /.blackbox/pubring.gpg~
 /.blackbox/pubring.kbx~
 /.blackbox/secring.gpg
+/helm/encrypted.yaml
