@@ -7,7 +7,7 @@ import timezone from 'dayjs/plugin/timezone';
 import { SCHEDULED_MESSAGE_HASH_SALT, SCHEDULED_MESSAGE_PUBLISH_HOUR } from '../constants';
 import { UserNotAuthorizedError } from '../messages';
 import { XkcdComicService } from './xkcd-comic.service';
-import { HackernewsService } from './hackernews.service';
+import { HackerStory, HackernewsService } from './hackernews.service';
 
 dayjs.extend(timezone);
 dayjs.tz.setDefault("Asia/Hong_Kong");
@@ -66,10 +66,13 @@ export class ScheduledMessageService {
   }
 
   async publishAndDiscard() {
+    const now = dayjs();
+    const mrkdwnDivider = "~----------------~";
+
     const messagesToBePulished = await this.prisma.scheduledMessage.findMany({
       where: {
         scheduled_at: {
-          lte: new Date()
+          lte: now.toDate(),
         },
       },
     })
@@ -84,7 +87,7 @@ export class ScheduledMessageService {
     if (messagesToBePulished.length === 0) {
       summaryBlocks.push({
         "type": "mrkdwn",
-        "text": "\n_No News._ :cheemscry:"
+        "text": "\n_No News._ :poorcoffee:"
       });
     }
 
@@ -93,7 +96,7 @@ export class ScheduledMessageService {
         "type": "section",
         "text": {
           "type": "mrkdwn",
-          "text": `Doge Summary (\`${process.env.SCHEDULED_MESSAGE_COMMAND_SCHEDULE}\` to add)`,
+          "text": `*Chima Summary* :scarychima: (\`${process.env.SCHEDULED_MESSAGE_COMMAND_SCHEDULE}\` to add)`,
         },
       },
       ...summaryBlocks.map(block => (
@@ -104,27 +107,23 @@ export class ScheduledMessageService {
       ))
     ];
 
-    const now = dayjs();
-    const topStory = await new HackernewsService().getTopStory().catch(() => {});
-    if (topStory) {
+    const topStories: HackerStory[] = await new HackernewsService().getTopStories(3).catch(() => []);
+    if (topStories.length > 0) {
       messageBlocks.push(
         {
-          "type": "divider"
-        },
-        {
           "type": "section",
           "text": {
             "type": "mrkdwn",
-            "text": "*Hacker News Top Story* :rolled_up_newspaper:",
+            "text": `${mrkdwnDivider}\n*Hacker News Top Story* :rolled_up_newspaper:`,
           },
         },
-        {
+        ...topStories.map((story, index) => ({
           "type": "section",
           "text": {
             "type": "mrkdwn",
-            "text": `<${topStory.url}|${topStory.title}>`,
+            "text": `${index + 1}. <${story.url}|${story.title}>`,
           },
-        },
+        })),
       );
     }
 
@@ -133,13 +132,10 @@ export class ScheduledMessageService {
       if (randomComicURL) {
         messageBlocks.push(
           {
-            "type": "divider"
-          },
-          {
             "type": "section",
             "text": {
               "type": "mrkdwn",
-              "text": "*Random Xkcd Comic* :doge:",
+              "text": `${mrkdwnDivider}\n*Random Xkcd Comic* :hehechima:`,
             },
           },
           {
