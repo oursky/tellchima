@@ -13,10 +13,16 @@ const slackApp = getSlack();
 slackApp.command(process.env.SCHEDULED_MESSAGE_COMMAND_SCHEDULE, async ({ payload, ack, respond }) => {
   await ack();
 
-  await respond("Woof! Processing...");
+  const parsedText = payload.text.trim();
+  if (!parsedText) {
+    await respond(`Please provide a message to schedule e.g. \`${process.env.SCHEDULED_MESSAGE_COMMAND_SCHEDULE} Hello world!\``);
+    return;
+  }
+
+  await respond("Meow! Processing...");
 
   const scheduledMessageService = new ScheduledMessageService(getPrisma(), slackApp);
-  const scheduledMessage = await scheduledMessageService.schedule(payload.text);
+  const scheduledMessage = await scheduledMessageService.schedule(parsedText);
 
   await respond(
 `Received!
@@ -27,11 +33,17 @@ P.S. You can remove this post with \`${process.env.SCHEDULED_MESSAGE_COMMAND_UNS
 slackApp.command(process.env.SCHEDULED_MESSAGE_COMMAND_UNSCHEDULE, async ({ payload, ack, respond }) => {
   await ack();
 
-  await respond("Woof! Processing...");
+  const parsedText = payload.text.trim();
+  if (!parsedText) {
+    await respond(`Please provide a message ID and hash to delete e.g. \`${process.env.SCHEDULED_MESSAGE_COMMAND_UNSCHEDULE} #0 ABCD1234\``);
+    return;
+  }
+
+  await respond("Meow! Processing...");
 
   const scheduledMessageService = new ScheduledMessageService(getPrisma(), slackApp);
 
-  const [rawMessageID, deletionHash] = payload.text.split(" ");
+  const [rawMessageID, deletionHash] = parsedText.split(" ");
   const messageID = parseInt(rawMessageID.replace("#", ""), 10);
 
   await scheduledMessageService.unschedule(messageID, deletionHash)
@@ -39,10 +51,8 @@ slackApp.command(process.env.SCHEDULED_MESSAGE_COMMAND_UNSCHEDULE, async ({ payl
     return respond("Unscheduled successfully");
   })
   .catch((error) => {
-    console.log("=== error", error);
-
     if (error instanceof UserNotAuthorizedError) {
-      return respond("Only message owner may delete this message")
+      return respond("Looks like you can't delete this message :politecat:")
     }
     if (error instanceof APIError) {
       return respond(error.description);

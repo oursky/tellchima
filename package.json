@@ -6,7 +6,7 @@
   "scripts": {
     "start": "pnpm start:dev",
     "start:prod": "prisma migrate dev && node dist/main.js",
-    "start:dev": "ts-node src/main.ts",
+    "start:dev": "nodemon src/main.ts",
     "cli:publish-and-discard": "ts-node src/cli/publish-and-discard.ts",
     "generate": "prisma generate",
     "migrate": "prisma migrate deploy",
@@ -30,6 +30,7 @@
   "devDependencies": {
     "@types/cron": "^2.0.0",
     "@types/node": "^18.11.18",
+    "nodemon": "^2.0.22",
     "ts-node": "^10.9.1",
     "typesync": "^0.9.2"
   }
