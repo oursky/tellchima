@@ -14,13 +14,35 @@ setup-local:
 
 	cp -r .env.example .env
 
-.PHONY: start
-start:
+.PHONY: dev
+dev:
+	make generate
+	make migrate
 	pnpm start:dev
 
 .PHONY: ngrok
 ngrok:
 	ngrok http 3000
+
+.PHONY: dep
+dep:
+	pnpm install
+
+.PHONY: generate
+generate:
+	pnpm generate
+
+.PHONY: migrate
+migrate:
+	pnpm migrate
+
+.PHONY: create-migration
+create-migration:
+	pnpm create-migration -- -n $(NAME)
+
+.PHONY: cli-publish-and-discard
+cli-publish-and-discard:
+	pnpm cli:publish-and-discard
 
 .PHONY: docker-image
 docker-image:
