@@ -1,6 +1,6 @@
-### :dog: Tell Doge
+### :cat: Tell Chima
 
-> Tries to implement similar functionalities to `/tellchima`
+> Just `/tellchima`
 
 #### Setup
 
@@ -11,7 +11,7 @@ $ make setup-local
 # `SLACK_SIGNING_SECRET`: "Signing Secret" field at https://api.slack.com/apps/A04HKMSH3DE/general
 # `SLACK_BOT_TOKEN`: "Bot User OAuth Token" field at https://api.slack.com/apps/A04HKMSH3DE/install-on-team
 $ cp .env.example .env
-$ make start
+$ make dev
 ```
 
 In another terminal...
