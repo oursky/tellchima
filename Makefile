@@ -1,7 +1,7 @@
 GIT_SHORT_SHA ?= $(shell git rev-parse --short=8 HEAD)
 
-IMAGE_PLATFORM ?= amd64
-IMAGE_REGISTRY ?= gcr.io/oursky-kube
+IMAGE_PLATFORM ?= linux/amd64
+IMAGE_REGISTRY ?= us-east1-docker.pkg.dev/oursky-kube/pandawork
 IMAGE_TAG ?= $(IMAGE_REGISTRY)/tellchima:$(GIT_SHORT_SHA)
 K8S_NAMESPACE ?= tellchima2
 
@@ -46,7 +46,8 @@ cli-publish-and-discard:
 
 .PHONY: docker-image
 docker-image:
-	docker build \
+	docker buildx build \
+		--load \
 		--file ./Dockerfile \
 		--platform $(IMAGE_PLATFORM) \
 		--tag $(IMAGE_TAG) \

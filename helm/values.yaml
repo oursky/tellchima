@@ -1,5 +1,5 @@
 image:
-  registry: gcr.io/oursky-kube
+  registry: us-east1-docker.pkg.dev/oursky-kube/pandawork
 scheduledMessage:
   channelId: C024JGMKY
   command:
